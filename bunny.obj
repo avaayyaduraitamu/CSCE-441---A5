@@ -1,0 +1,35 @@
+#version 120
+
+uniform mat4 P;
+uniform mat4 MV;
+uniform mat4 MVit;
+uniform float t; 
+uniform int isRev; 
+
+attribute vec4 aPos; 
+attribute vec3 aNor;
+
+varying vec3 vPosEye; 
+varying vec3 vNorEye; 
+
+void main() {
+    vec4 pos = aPos;
+    vec3 nor = aNor;
+
+    if (isRev == 1) {
+        float h = aPos.x;
+        float theta = aPos.y;
+        float r = cos(h * 6.28 + t) + 2.0; 
+        pos = vec4(r * cos(theta), h * 2.0, r * sin(theta), 1.0);
+
+        float drdh = -6.28 * sin(h * 6.28 + t);
+        vec3 dpdh = vec3(drdh * cos(theta), 2.0, drdh * sin(theta));
+        vec3 dpdtheta = vec3(-r * sin(theta), 0.0, r * cos(theta));
+        nor = normalize(cross(dpdtheta, dpdh));
+    }
+
+    vPosEye = vec3(MV * pos);
+    vNorEye = vec3(MVit * vec4(nor, 0.0));
+    gl_Position = P * MV * pos;
+}
+
